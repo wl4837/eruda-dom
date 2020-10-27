@@ -4,13 +4,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Eruda-dom</title>
+    <style>
+      iframe{
+        width: 100%;
+        height: 500px;
+      }
+    </style>
   </head>
   <body>
-    <!-- This is a comment -->
-    <div touchstart>Hello world!</div>
-    <div>testwordbreaktestwordbreaktestwordbreaktestwordbreaktestwordbreaktestwordbreak</div>
-    <script src="node_modules/eruda/eruda.js"></script>
-    <script>eruda.init({tool: ['elements']});</script>
+    <iframe src="/news.html" id="iframe1"></iframe>
+    <script src="/eruda.js"></script>
+    <script>
+      eruda.init({tool: [],useShadowDom: false});
+    </script>
     <script src="assets/eruda-dom.js"></script>
     <script>eruda.add(erudaDom).show('dom').show();</script>
   </body>

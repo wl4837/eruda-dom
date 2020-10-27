@@ -4,58 +4,67 @@ module.exports = function(eruda) {
   class Dom extends eruda.Tool {
     constructor() {
       super()
+      window.erudaDomThis = this;
       this.name = 'dom'
       this._style = evalCss(require('./style.scss'))
       this._isInit = false
       this._htmlTagTpl = require('./htmlTag.hbs')
       this._textNodeTpl = require('./textNode.hbs')
-      this._selectedEl = document.documentElement
+      this._selectedEl = document.querySelector("#iframe1").contentDocument.body
       this._htmlCommentTpl = require('./htmlComment.hbs')
       this._elementChangeHandler = el => {
         if (this._selectedEl === el) return
+        console.log("_elementChangeHandler");
         this.select(el)
       }
     }
     init($el, container) {
+      console.log("init");
       super.init($el)
       this._container = container
       $el.html(require('./template.hbs')())
       this._$domTree = $el.find('.eruda-dom-tree')
-
       this._bindEvent()
     }
     show() {
+      console.log("show");
       super.show()
-
       if (!this._isInit) this._initTree()
     }
     hide() {
+      console.log("hide");
       super.hide()
     }
     select(el) {
-      const els = []
-      els.push(el)
-      while (el.parentElement) {
-        els.unshift(el.parentElement)
-        el = el.parentElement
-      }
-      while (els.length > 0) {
-        el = els.shift()
-        const erudaDom = el.erudaDom
-        if (erudaDom) {
-          if (erudaDom.close && erudaDom.open) {
-            erudaDom.close()
-            erudaDom.open()
-          }
-        } else {
-          break
+      console.log("select");
+      console.log(el);
+      console.log(el.parentElement);
+      if ( el.parentElement != undefined ) {
+        const els = []
+        els.push(el)
+        while (el.parentElement) {
+          els.unshift(el.parentElement)
+          el = el.parentElement
         }
-        if (els.length === 0 && el.erudaDom) {
-          el.erudaDom.select()
+        while (els.length > 0) {
+          el = els.shift()
+          const erudaDom = el.erudaDom
+          if (erudaDom) {
+            if (erudaDom.close && erudaDom.open) {
+              erudaDom.close()
+              erudaDom.open()
+            }
+          } else {
+            break
+          }
+          if (els.length === 0 && el.erudaDom) {
+            el.erudaDom.select()
+          }
         }
       }
     }
     destroy() {
+      console.log("destroy");
       super.destroy()
       evalCss.remove(this._style)
       const elements = this._container.get('elements')
@@ -64,6 +73,7 @@ module.exports = function(eruda) {
       }
     }
     _bindEvent() {
+      console.log("_bindEvent");
       const container = this._container
 
       const elements = container.get('elements')
@@ -77,23 +87,34 @@ module.exports = function(eruda) {
       })
     }
     _setElement(el) {
+      console.log("_setElement");
       const elements = this._container.get('elements')
+      // this._initTreeElement(el)
       if (!elements) return
-
       elements.set(el)
     }
     _initTree() {
+      console.log("_initTree");
       this._isInit = true
-
+      this._$domTree.get(0).replaceChildren();
       this._renderChildren(null, this._$domTree)
-      this.select(document.body)
+      // this.select(document.querySelector("#iframe1").contentDocument.querySelectorAll("body>*")[0])
+    }
+    _initTreeElement(element) {
+      console.log("_initTreeElement");
+      console.log(element);
+      this._isInit = true
+      this._$domTree.get(0).replaceChildren();
+      this._renderChildren(null, this._$domTree)
+      this.select(element)
     }
     _renderChildren(node, $container) {
+      console.log("_renderChildren");
       let children
       if (!node) {
-        children = [document.documentElement]
+        children = [document.querySelector("#iframe1").contentDocument.documentElement];
       } else {
-        children = toArr(node.childNodes)
+        children = toArr(node.childNodes);
       }
 
       const container = $container.get(0)
@@ -107,6 +128,7 @@ module.exports = function(eruda) {
       each(children, child => this._renderChild(child, container))
     }
     _renderChild(child, container) {
+      console.log("_renderChild");
       const $tag = createEl('li')
       let isEndTag = false
 
@@ -123,6 +145,10 @@ module.exports = function(eruda) {
         if (hasOneTextNode) {
           data.text = child.childNodes[0].nodeValue
         }
+        console.log("expandable");
+        console.log(expandable);
+        console.log(hasOneTextNode);
+        console.log("hasOneTextNode");
         $tag.html(this._htmlTagTpl(data))
         if (expandable && !hasOneTextNode) {
           $tag.addClass('eruda-expandable')
@@ -215,6 +241,7 @@ module.exports = function(eruda) {
   }
 
   function getHtmlTagData(el) {
+    console.log("getHtmlTagData");
     const ret = {}
 
     ret.tagName = el.tagName.toLocaleLowerCase()
